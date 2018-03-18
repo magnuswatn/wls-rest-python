@@ -1,4 +1,4 @@
-wls_rest_python
+wls-rest-python
 ===============
 
 .. image:: https://travis-ci.org/magnuswatn/wls-rest-python.svg?branch=master
@@ -40,7 +40,8 @@ Explore the API, change properties and undeploy applications:
     >>> wls = WLS('https://wls.example.com:7001', 'weblogic', 'welcome1')
     >>> 
     >>> dir(wls.edit.batchConfig)
-    ['canonical', 'dynamicallyCreated', 'id', 'identity', 'name', 'notes', 'parent', 'schemaName', 'self', 'tags', 'type']
+    ['canonical', 'dynamicallyCreated', 'id', 'identity', 'name', 'notes','parent', 'schemaName',
+    'self', 'tags', 'type']
     >>> 
     >>> wls.edit.servers.myServer.nativeIOEnabled
     True
