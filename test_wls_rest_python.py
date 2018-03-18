@@ -87,24 +87,26 @@ def test_wls_get():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.session = MagicMock()
     fake_wls.session.get = MagicMock()
-    wls_rest_python.WLS.get(fake_wls, 'https://url')
-    fake_wls.session.get.assert_called_once_with('https://url')
+    wls_rest_python.WLS.get(fake_wls, 'https://url', weird_requests_option='hei')
+    fake_wls.session.get.assert_called_once_with('https://url', weird_requests_option='hei')
 
 
 def test_wls_post():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.session = MagicMock()
     fake_wls.session.post = MagicMock()
-    wls_rest_python.WLS.post(fake_wls, 'https://url')
-    fake_wls.session.post.assert_called_once_with('https://url', headers=None)
+    wls_rest_python.WLS.post(fake_wls, 'https://url', weird_requests_option='hei')
+    fake_wls.session.post.assert_called_once_with('https://url', headers=None,
+                                                  weird_requests_option='hei')
 
 
 def test_wls_delete():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.session = MagicMock()
     fake_wls.session.delete = MagicMock()
-    wls_rest_python.WLS.delete(fake_wls, 'https://url')
-    fake_wls.session.delete.assert_called_once_with('https://url', headers=None)
+    wls_rest_python.WLS.delete(fake_wls, 'https://url', weird_requests_option='hei')
+    fake_wls.session.delete.assert_called_once_with('https://url', headers=None,
+                                                    weird_requests_option='hei')
 
 
 def test_wls_handle_response_from_get():
@@ -479,8 +481,8 @@ def test_wls_object_empty_items():
 def test_wls_object_delete():
     fake_wls = MagicMock()
     wls_obj = wls_rest_python.WLSObject('name', 'https://url', fake_wls)
-    wls_obj.delete()
-    fake_wls.delete.assert_called_once_with('https://url', False)
+    wls_obj.delete(hei='sann')
+    fake_wls.delete.assert_called_once_with('https://url', False, hei='sann')
     wls_obj.delete(prefer_async=True)
     fake_wls.delete.assert_called_with('https://url', True)
 

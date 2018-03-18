@@ -119,13 +119,13 @@ class WLS(object):
             link_obj = WLSObject(link['rel'], link['href'], self)
             setattr(self, link['rel'], link_obj)
 
-    def get(self, url):
+    def get(self, url, **kwargs):
         """
         Does a GET request to the specified URL.
 
         Returns the decoded JSON.
         """
-        response = self.session.get(url)
+        response = self.session.get(url, **kwargs)
         return self._handle_response(response)
 
     def post(self, url, prefer_async=False, **kwargs):
@@ -139,7 +139,7 @@ class WLS(object):
         response = self.session.post(url, headers=headers, **kwargs)
         return self._handle_response(response)
 
-    def delete(self, url, prefer_async=False):
+    def delete(self, url, prefer_async=False, **kwargs):
         """
         Does a DELETE request to the specified URL.
 
@@ -147,7 +147,7 @@ class WLS(object):
         WLSObject. Otherwise it will return the decoded JSON
         """
         headers = {'Prefer': 'respond-async'} if prefer_async else None
-        response = self.session.delete(url, headers=headers)
+        response = self.session.delete(url, headers=headers, **kwargs)
         return self._handle_response(response)
 
     def _handle_response(self, response):
