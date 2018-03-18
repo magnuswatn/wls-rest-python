@@ -40,15 +40,16 @@ Explore the API, change properties and undeploy applications:
     >>> wls = WLS('https://wls.example.com:7001', 'weblogic', 'welcome1')
     >>> 
     >>> dir(wls.edit.batchConfig)
-    ['canonical', 'dynamicallyCreated', 'id', 'identity', 'name', 'notes','parent', 'schemaName',
-    'self', 'tags', 'type']
+    ['canonical', 'dynamicallyCreated', 'id', 'identity', 'name', 'notes','parent',
+    'schemaName', 'self', 'tags', 'type']
     >>> 
     >>> wls.edit.servers.myServer.nativeIOEnabled
     True
     >>> wls.edit.servers.myServer.update(nativeIOEnabled=False)
     >>> wls.edit.servers.myServer.nativeIOEnabled
     False
-    >>> wls.domainRuntime.deploymentManager.appDeploymentRuntimes.myApp.getState(target='myServer')
+    >>> wls.domainRuntime.deploymentManager.appDeploymentRuntimes.myApp.getState(
+    ... target='myServer')
     {'return': 'STATE_ACTIVE'}
     >>> 
     >>> wls.domainRuntime.deploymentManager.appDeploymentRuntimes.myApp.undeploy()
