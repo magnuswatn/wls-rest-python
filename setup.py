@@ -22,7 +22,7 @@ version = meta['version']
 
 setup(
     name='wls-rest-python',
-    description='A Python client for Weblogic REST API',
+    description='A Python client for the Weblogic REST API',
     long_description=readme,
     version=version,
     license='MIT',
