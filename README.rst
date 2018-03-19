@@ -56,7 +56,7 @@ Explore the API, change properties and undeploy applications:
     >>> 
 
 
-Restart all managed servers asynchronous:
+Start all managed servers asynchronously:
 
 .. code-block:: python
 
@@ -67,9 +67,9 @@ Restart all managed servers asynchronous:
     admin_server_name = wls.edit.adminServerName
 
     running_jobs = []
-    for server in wls.domainRuntime.serverRuntimes:
+    for server in wls.domainRuntime.serverLifeCycleRuntimes:
         if server.name != admin_server_name:
-            running_jobs.append(server.restart(prefer_async=True))
+            running_jobs.append(server.start(prefer_async=True))
 
     while running_jobs:
         for job in running_jobs:
