@@ -1,12 +1,12 @@
 """
-A Pythin client for the Weblogic Server REST API.
+A Python client for the Weblogic Server REST API.
 
 https://github.com/magnuswatn/wls-rest-python
 """
 import logging
 import requests
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 logger = logging.getLogger(__name__)
 
