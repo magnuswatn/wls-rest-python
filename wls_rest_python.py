@@ -6,10 +6,13 @@ https://github.com/magnuswatn/wls-rest-python
 import logging
 import requests
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 logger = logging.getLogger(__name__)
 
+# This is quite high, as the WLS server will, by default,
+# do operations that take "approximately 5 minutes" synchronous.
+DEFAULT_TIMEOUT = 305
 
 class WLSException(Exception):
     """Superclass for exceptions thrown by this module"""
@@ -100,7 +103,8 @@ class WLS(object):
     :param bool verify_ssl: Whether to verify certificates on SSL connections.
     """
 
-    def __init__(self, host, username, password, version='latest', verify=True):
+    def __init__(self, host, username, password, version='latest', verify=True,
+                 timeout=DEFAULT_TIMEOUT):
         self.session = requests.Session()
         self.session.verify = verify
         self.session.auth = (username, password)
@@ -110,6 +114,7 @@ class WLS(object):
         self.session.headers.update(
             {'Accept': 'application/json', 'User-Agent': user_agent, 'X-Requested-By': user_agent}
         )
+        self.timeout = timeout
         self.base_url = '{}/management/weblogic/{}'.format(host, version)
         collection = self.get(self.base_url)
         self.version = collection['version']
@@ -125,7 +130,7 @@ class WLS(object):
 
         Returns the decoded JSON.
         """
-        response = self.session.get(url, **kwargs)
+        response = self.session.get(url, timeout=self.timeout, **kwargs)
         return self._handle_response(response)
 
     def post(self, url, prefer_async=False, **kwargs):
@@ -136,7 +141,7 @@ class WLS(object):
         WLSObject. Otherwise it will return the decoded JSON
         """
         headers = {'Prefer': 'respond-async'} if prefer_async else None
-        response = self.session.post(url, headers=headers, **kwargs)
+        response = self.session.post(url, headers=headers, timeout=self.timeout, **kwargs)
         return self._handle_response(response)
 
     def delete(self, url, prefer_async=False, **kwargs):
@@ -147,7 +152,7 @@ class WLS(object):
         WLSObject. Otherwise it will return the decoded JSON
         """
         headers = {'Prefer': 'respond-async'} if prefer_async else None
-        response = self.session.delete(url, headers=headers, **kwargs)
+        response = self.session.delete(url, headers=headers, timeout=self.timeout, **kwargs)
         return self._handle_response(response)
 
     def _handle_response(self, response):

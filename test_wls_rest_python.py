@@ -34,6 +34,7 @@ def test_wls_init():
     assert wls.isLatest is True
     assert wls.lifecycle == 'active'
     assert wls.version == '17.12.3.1'
+    assert wls.timeout == wls_rest_python.DEFAULT_TIMEOUT
     assert wls.edit._url == 'https://edit-link'
     assert wls.session.verify is True
     assert wls.session.auth == ('weblogic', 'Welcome1')
@@ -82,30 +83,54 @@ def test_wls_init_noverify():
         )
     assert wls.session.verify == False
 
+def test_wls_init_nondefault_timeout():
+    collection = {
+        'version': '17.12.3.1',
+        'isLatest': True,
+        'lifecycle': 'active',
+        'links': [
+            {'rel': 'edit', 'href': 'https://edit-link'},
+            {'rel': 'domainRuntime', 'href': 'https://domainruntime-link'},
+        ],
+    }
+    with requests_mock.mock() as r:
+        r.get(
+            'https://wls.example.com:7001/management/weblogic/latest', json=collection
+        )
+        wls = wls_rest_python.WLS(
+            'https://wls.example.com:7001', 'weblogic', 'Welcome1', timeout=832
+        )
+    assert wls.timeout == 832
 
 def test_wls_get():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.timeout = 372
     fake_wls.session = MagicMock()
     fake_wls.session.get = MagicMock()
     wls_rest_python.WLS.get(fake_wls, 'https://url', weird_requests_option='hei')
-    fake_wls.session.get.assert_called_once_with('https://url', weird_requests_option='hei')
+    fake_wls.session.get.assert_called_once_with('https://url', timeout=372,
+                                                 weird_requests_option='hei')
 
 
 def test_wls_post():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.timeout = 372
     fake_wls.session = MagicMock()
     fake_wls.session.post = MagicMock()
     wls_rest_python.WLS.post(fake_wls, 'https://url', weird_requests_option='hei')
     fake_wls.session.post.assert_called_once_with('https://url', headers=None,
+                                                  timeout=372,
                                                   weird_requests_option='hei')
 
 
 def test_wls_delete():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.timeout = 372
     fake_wls.session = MagicMock()
     fake_wls.session.delete = MagicMock()
     wls_rest_python.WLS.delete(fake_wls, 'https://url', weird_requests_option='hei')
     fake_wls.session.delete.assert_called_once_with('https://url', headers=None,
+                                                    timeout=372,
                                                     weird_requests_option='hei')
 
 
