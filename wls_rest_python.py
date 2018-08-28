@@ -6,7 +6,7 @@ https://github.com/magnuswatn/wls-rest-python
 import logging
 import requests
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,7 @@ class WLS(object):
     :param string password: Password used to authenticate against the server
     :param string version: Version of the rest interface to use. Defaults to "latest"
     :param bool verify_ssl: Whether to verify certificates on SSL connections.
+    :param float timeout: The timeout value to use, in seconds. Default is 305.
     """
 
     def __init__(self, host, username, password, version='latest', verify=True,

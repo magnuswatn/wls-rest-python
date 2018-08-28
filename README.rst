@@ -78,7 +78,7 @@ Start all managed servers asynchronously:
         time.sleep(10)
 
 
-Undeploy all applications and deploy a new:
+Undeploy all applications and deploy a new one:
 
 .. code-block:: python
 
