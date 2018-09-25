@@ -481,6 +481,57 @@ def test_wls_object_non_iter():
         for item in wls_obj:
             pass
 
+def test_wls_object_with_len():
+    collection = {
+        'items': [
+            {
+                'links': [{'rel': 'self', 'href': 'https://self-link'}],
+                'attr1': True,
+                'attr2': 2,
+                'attr3': 3,
+                'name': 'item 1',
+            },
+            {
+                'links': [{'rel': 'self', 'href': 'https://self-link2'}],
+                'attr1': True,
+                'attr2': 2,
+                'attr3': 3,
+                'name': 'item 2',
+            },
+            {
+                'links': [{'rel': 'self', 'href': 'https://self-link3'}],
+                'attr1': True,
+                'attr2': 2,
+                'attr3': 3,
+                'name': 'item 3',
+            },
+            {
+                'links': [{'rel': 'self', 'href': 'https://self-link4'}],
+                'attr1': False,
+                'attr2': 8,
+                'attr3': 3,
+                'name': 'item 4',
+            },
+        ]
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject('name', 'https://url', fake_wls)
+    assert len(wls_obj) == 4
+
+def test_wls_object_without_len():
+    collection = {
+        'links': [{'rel': 'self', 'href': 'https://self-link'}],
+        'attr1': False,
+        'attr2': 9,
+        'attr3': -7,
+        'name': 'what',
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject('name', 'https://url', fake_wls)
+    with pytest.raises(TypeError):
+        len(wls_obj)
 
 def test_wls_object_empty_items():
     # If there is an empty item array in the response,

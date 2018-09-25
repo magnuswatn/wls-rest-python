@@ -6,7 +6,7 @@ https://github.com/magnuswatn/wls-rest-python
 import logging
 import requests
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +323,14 @@ class WLSObject(object):
             return WLSItems(iter_items)
 
         raise TypeError('\'{}\' object is not iterable'.format(self._name))
+
+    def __len__(self):
+        try:
+            return len(self.__iter__().items)
+        except TypeError:
+            pass
+
+        raise TypeError('object of type \'{}\' has no len()'.format(self._name))
 
     def delete(self, prefer_async=False, **kwargs):
         """
