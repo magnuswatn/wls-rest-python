@@ -264,6 +264,23 @@ def test_wls_handle_error_400():
     with pytest.raises(wls_rest_python.BadRequestException, match='insert detail here'):
         wls_rest_python.WLS._handle_error(response)
 
+def test_wls_handle_error_400_with_alternative_json():
+    response = MagicMock()
+    response.status_code = 400
+    response.json = MagicMock(return_value={
+        u'status': 400,
+        u'wls:errorsDetails': [
+            {
+                u'o:errorPath': u'machine',
+                u'type': u'http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1',
+                u'detail': u'Type mismatch. Cannot convert hei to weblogic.management.configuration.MachineMBean.',
+                u'title': u'FAILURE'
+            }
+        ],
+        u'type': u'http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1',
+        u'title': u'ERRORS'})
+    with pytest.raises(wls_rest_python.BadRequestException, match='Type mismatch'):
+        wls_rest_python.WLS._handle_error(response)
 
 def test_wls_handle_error_401():
     response = MagicMock()
@@ -342,9 +359,9 @@ def test_wls_handle_error_503():
 def test_wls_handle_unknown_error():
     response = MagicMock()
     response.status_code = 507
-    response.json = MagicMock(return_value={'detail': 'whaat'})
+    response.json = MagicMock(return_value={'detail': 'Weird error'})
     with pytest.raises(
-        wls_rest_python.WLSException, match='An unknown error occured. Got status code: 507'
+        wls_rest_python.WLSException, match='Weird error'
     ):
         wls_rest_python.WLS._handle_error(response)
 

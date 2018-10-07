@@ -195,39 +195,43 @@ class WLS(object):
 
     @staticmethod
     def _handle_error(response):
+
+        exception_type = WLSException
+        exception_message = 'An unknown error occured.'
+
         if response.status_code == 400:
-            raise BadRequestException(response.json()['detail'])
+            exception_type = BadRequestException
 
         if response.status_code == 401:
             # does not return json
             raise UnauthorizedException()
 
         if response.status_code == 403:
-            raise ForbiddenException(response.json()['detail'])
+            exception_type = ForbiddenException
 
         if response.status_code == 404:
-            raise NotFoundException(response.json()['detail'])
+            exception_type = NotFoundException
 
         if response.status_code == 405:
-            raise MethodNotAllowedException(response.json()['detail'])
+            exception_type = MethodNotAllowedException
 
         if response.status_code == 406:
-            raise NotAcceptableException(response.json()['detail'])
+            exception_type = NotAcceptableException
 
         if response.status_code == 500:
-            # may not return json...
-            try:
-                raise ServerErrorException(response.json()['detail'])
-            except ValueError:
-                pass
-            raise ServerErrorException(response.text)
+            exception_type = ServerErrorException
 
         if response.status_code == 503:
-            raise ServiceUnavailableException(response.json()['detail'])
+            exception_type = ServiceUnavailableException
 
-        raise WLSException(
-            'An unknown error occured. Got status code: {}'.format(response.status_code)
-        )
+        try:
+            exception_message = response.json()['detail']
+        except KeyError:
+            exception_message = response.json()
+        except ValueError:
+            exception_message = response.text
+
+        raise exception_type(exception_message)
 
 
 class WLSObject(object):
