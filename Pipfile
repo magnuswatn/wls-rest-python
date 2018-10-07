@@ -1,17 +1,12 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 requests = "*"
 
-
 [dev-packages]
-
 pylint = "*"
 restructuredtext-lint = "*"
 pygments = "*"
@@ -22,7 +17,8 @@ black = "*"
 "doc8" = "*"
 tox = "*"
 
-
 [requires]
-
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true

@@ -109,3 +109,6 @@ venv.bak/
 
 # old stuff
 old_*
+
+# Don't need lockfile in libraries
+Pipfile.lock
