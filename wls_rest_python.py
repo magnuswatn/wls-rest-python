@@ -202,26 +202,26 @@ class WLS(object):
         if response.status_code == 400:
             exception_type = BadRequestException
 
-        if response.status_code == 401:
+        elif response.status_code == 401:
             # does not return json
             raise UnauthorizedException()
 
-        if response.status_code == 403:
+        elif response.status_code == 403:
             exception_type = ForbiddenException
 
-        if response.status_code == 404:
+        elif response.status_code == 404:
             exception_type = NotFoundException
 
-        if response.status_code == 405:
+        elif response.status_code == 405:
             exception_type = MethodNotAllowedException
 
-        if response.status_code == 406:
+        elif response.status_code == 406:
             exception_type = NotAcceptableException
 
-        if response.status_code == 500:
+        elif response.status_code == 500:
             exception_type = ServerErrorException
 
-        if response.status_code == 503:
+        elif response.status_code == 503:
             exception_type = ServiceUnavailableException
 
         try:
