@@ -20,7 +20,7 @@ linked that it becomes limiting.
 It creates Python objects dynamically based on the response from the server,
 so that it's easy to quickly write useful and Pythonic scripts.
 
-It's tested against 12.2.1.2, but should work fine with all 12c R2 releases.
+It's tested against 12.2.1.3, but should work fine with all 12c R2 releases.
 
 Installation
 ------------
