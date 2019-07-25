@@ -18,16 +18,12 @@ DEFAULT_TIMEOUT = 305
 class WLSException(Exception):
     """Superclass for exceptions thrown by this module"""
 
-    pass
-
 
 class BadRequestException(WLSException):
     """
     A REST method returns 400 (BAD REQUEST) if the request failed because
     something is wrong in the specified request, for example, invalid argument values.
     """
-
-    pass
 
 
 class UnauthorizedException(WLSException):
@@ -37,8 +33,6 @@ class UnauthorizedException(WLSException):
     credentials (for example, a bad password).
     """
 
-    pass
-
 
 class ForbiddenException(WLSException):
     """
@@ -46,16 +40,12 @@ class ForbiddenException(WLSException):
     OPERATOR, DEPLOYER or MONITOR role.
     """
 
-    pass
-
 
 class NotFoundException(WLSException):
     """
     A REST method returns 404 (NOT FOUND) if the requested URL does not refer to an
     existing entity.
     """
-
-    pass
 
 
 class MethodNotAllowedException(WLSException):
@@ -66,8 +56,6 @@ class MethodNotAllowedException(WLSException):
     configuration editing).
     """
 
-    pass
-
 
 class NotAcceptableException(WLSException):
     """
@@ -76,8 +64,6 @@ class NotAcceptableException(WLSException):
     example, the client's Accept header asks for XML but the resource can only return
     JSON.
     """
-
-    pass
 
 
 class ServerErrorException(WLSException):
@@ -90,16 +76,12 @@ class ServerErrorException(WLSException):
     server log.
     """
 
-    pass
-
 
 class ServiceUnavailableException(WLSException):
     """
     The server is currently unable to handle the request due to temporary overloading or
     maintenance of the server. The WLS REST web application is not currently running.
     """
-
-    pass
 
 
 class WLS(object):
@@ -110,7 +92,7 @@ class WLS(object):
     :param string username: Username used to authenticate against the server
     :param string password: Password used to authenticate against the server
     :param string version: Version of the rest interface to use. Defaults to "latest"
-    :param bool verify_ssl: Whether to verify certificates on SSL connections.
+    :param bool verify: Whether to verify certificates on SSL connections.
     :param float timeout: The timeout value to use, in seconds. Default is 305.
     """
 
