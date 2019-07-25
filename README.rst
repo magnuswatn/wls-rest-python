@@ -10,6 +10,9 @@ wls-rest-python
 .. image:: https://badge.fury.io/py/wls-rest-python.svg
     :target: https://badge.fury.io/py/wls-rest-python
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 This is a Python client for Weblogics RESTful Management Services.
 It takes care of some of the quirks with the API, without being so closely
 linked that it becomes limiting.

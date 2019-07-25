@@ -6,7 +6,7 @@ https://github.com/magnuswatn/wls-rest-python
 import logging
 import requests
 
-__version__ = '0.1.4'
+__version__ = "0.1.4"
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,10 @@ logger = logging.getLogger(__name__)
 # do operations that take "approximately 5 minutes" synchronous.
 DEFAULT_TIMEOUT = 305
 
+
 class WLSException(Exception):
     """Superclass for exceptions thrown by this module"""
+
     pass
 
 
@@ -24,6 +26,7 @@ class BadRequestException(WLSException):
     A REST method returns 400 (BAD REQUEST) if the request failed because
     something is wrong in the specified request, for example, invalid argument values.
     """
+
     pass
 
 
@@ -33,6 +36,7 @@ class UnauthorizedException(WLSException):
     to perform the operation. 401 is also returned if the user supplied incorrect
     credentials (for example, a bad password).
     """
+
     pass
 
 
@@ -41,6 +45,7 @@ class ForbiddenException(WLSException):
     A REST method returns 403 (FORBIDDEN) if the user is not in the ADMIN,
     OPERATOR, DEPLOYER or MONITOR role.
     """
+
     pass
 
 
@@ -49,6 +54,7 @@ class NotFoundException(WLSException):
     A REST method returns 404 (NOT FOUND) if the requested URL does not refer to an
     existing entity.
     """
+
     pass
 
 
@@ -59,6 +65,7 @@ class MethodNotAllowedException(WLSException):
     using a resource in the domain configuration tree (only the edit tree allows
     configuration editing).
     """
+
     pass
 
 
@@ -69,6 +76,7 @@ class NotAcceptableException(WLSException):
     example, the client's Accept header asks for XML but the resource can only return
     JSON.
     """
+
     pass
 
 
@@ -81,6 +89,7 @@ class ServerErrorException(WLSException):
     include the text of the error or a stack trace, however, generally they are logged in the
     server log.
     """
+
     pass
 
 
@@ -89,6 +98,7 @@ class ServiceUnavailableException(WLSException):
     The server is currently unable to handle the request due to temporary overloading or
     maintenance of the server. The WLS REST web application is not currently running.
     """
+
     pass
 
 
@@ -104,26 +114,37 @@ class WLS(object):
     :param float timeout: The timeout value to use, in seconds. Default is 305.
     """
 
-    def __init__(self, host, username, password, version='latest', verify=True,
-                 timeout=DEFAULT_TIMEOUT):
+    def __init__(
+        self,
+        host,
+        username,
+        password,
+        version="latest",
+        verify=True,
+        timeout=DEFAULT_TIMEOUT,
+    ):
         self.session = requests.Session()
         self.session.verify = verify
         self.session.auth = (username, password)
-        user_agent = 'wls-rest-python {} ({})'.format(
-            __version__, self.session.headers['User-Agent']
+        user_agent = "wls-rest-python {} ({})".format(
+            __version__, self.session.headers["User-Agent"]
         )
         self.session.headers.update(
-            {'Accept': 'application/json', 'User-Agent': user_agent, 'X-Requested-By': user_agent}
+            {
+                "Accept": "application/json",
+                "User-Agent": user_agent,
+                "X-Requested-By": user_agent,
+            }
         )
         self.timeout = timeout
-        self.base_url = '{}/management/weblogic/{}'.format(host, version)
+        self.base_url = "{}/management/weblogic/{}".format(host, version)
         collection = self.get(self.base_url)
-        self.version = collection['version']
-        self.isLatest = collection['isLatest']
-        self.lifecycle = collection['lifecycle']
-        for link in collection['links']:
-            link_obj = WLSObject(link['rel'], link['href'], self)
-            setattr(self, link['rel'], link_obj)
+        self.version = collection["version"]
+        self.isLatest = collection["isLatest"]
+        self.lifecycle = collection["lifecycle"]
+        for link in collection["links"]:
+            link_obj = WLSObject(link["rel"], link["href"], self)
+            setattr(self, link["rel"], link_obj)
 
     def get(self, url, **kwargs):
         """
@@ -141,8 +162,10 @@ class WLS(object):
         If the response is a job or an collection, it will return an
         WLSObject. Otherwise it will return the decoded JSON
         """
-        headers = {'Prefer': 'respond-async'} if prefer_async else None
-        response = self.session.post(url, headers=headers, timeout=self.timeout, **kwargs)
+        headers = {"Prefer": "respond-async"} if prefer_async else None
+        response = self.session.post(
+            url, headers=headers, timeout=self.timeout, **kwargs
+        )
         return self._handle_response(response)
 
     def delete(self, url, prefer_async=False, **kwargs):
@@ -152,22 +175,26 @@ class WLS(object):
         If the response is a job or an collection, it will return an
         WLSObject. Otherwise it will return the decoded JSON
         """
-        headers = {'Prefer': 'respond-async'} if prefer_async else None
-        response = self.session.delete(url, headers=headers, timeout=self.timeout, **kwargs)
+        headers = {"Prefer": "respond-async"} if prefer_async else None
+        response = self.session.delete(
+            url, headers=headers, timeout=self.timeout, **kwargs
+        )
         return self._handle_response(response)
 
     def _handle_response(self, response):
         logger.debug(
-            'Sent %s request to %s, with headers:\n%s\n\nand body:\n%s',
+            "Sent %s request to %s, with headers:\n%s\n\nand body:\n%s",
             response.request.method,
             response.request.url,
-            '\n'.join(["{0}: {1}".format(k, v) for k, v in response.request.headers.items()]),
+            "\n".join(
+                ["{0}: {1}".format(k, v) for k, v in response.request.headers.items()]
+            ),
             response.request.body,
         )
         logger.debug(
-            'Recieved response:\nHTTP %s\n%s\n\n%s',
+            "Recieved response:\nHTTP %s\n%s\n\n%s",
             response.status_code,
-            '\n'.join(["{0}: {1}".format(k, v) for k, v in response.headers.items()]),
+            "\n".join(["{0}: {1}".format(k, v) for k, v in response.headers.items()]),
             response.content.decode(),
         )
 
@@ -176,7 +203,7 @@ class WLS(object):
 
         # GET is used by the WLSObject to retrieve the collection
         # so it must return only the decoded JSON, not an WLSobject
-        if response.request.method == 'GET':
+        if response.request.method == "GET":
             return response.json()
 
         response_json = response.json()
@@ -184,8 +211,14 @@ class WLS(object):
             return None
 
         try:
-            link = next((x['href'] for x in response_json['links'] if x['rel'] in ('self', 'job')))
-            name = response_json['name']
+            link = next(
+                (
+                    x["href"]
+                    for x in response_json["links"]
+                    if x["rel"] in ("self", "job")
+                )
+            )
+            name = response_json["name"]
         except (KeyError, StopIteration):
             # Not a job, and not a collection.
             # Don't know what it is, so just return the decoded json
@@ -197,7 +230,7 @@ class WLS(object):
     def _handle_error(response):
 
         exception_type = WLSException
-        exception_message = 'An unknown error occured.'
+        exception_message = "An unknown error occured."
 
         if response.status_code == 400:
             exception_type = BadRequestException
@@ -225,7 +258,7 @@ class WLS(object):
             exception_type = ServiceUnavailableException
 
         try:
-            exception_message = response.json()['detail']
+            exception_message = response.json()["detail"]
         except KeyError:
             exception_message = response.json()
         except ValueError:
@@ -252,16 +285,16 @@ class WLSObject(object):
         collection = self._wls.get(self._url)
         for key in collection:
             item = collection[key]
-            if key == 'links':
+            if key == "links":
                 for link in item:
-                    if link['rel'] == 'action':
-                        name = link['title']
+                    if link["rel"] == "action":
+                        name = link["title"]
                     else:
-                        name = link['rel']
+                        name = link["rel"]
                     attrs.append(name)
-            elif key == 'items':
+            elif key == "items":
                 for itm in item:
-                    attrs.append(itm['name'])
+                    attrs.append(itm["name"])
             else:
                 attrs.append(key)
         return attrs
@@ -275,33 +308,37 @@ class WLSObject(object):
         collection = self._wls.get(self._url)
         for key in collection:
             item = collection[key]
-            if key == 'links':
+            if key == "links":
                 for link in item:
-                    if link['rel'] == 'action':
-                        name = link['title']
+                    if link["rel"] == "action":
+                        name = link["title"]
                         if name == attr:
-                            obj = WLSAction(name, link['href'], self._wls)
+                            obj = WLSAction(name, link["href"], self._wls)
                             setattr(self, name, obj)
                             return obj
 
                     else:
-                        name = link['rel']
+                        name = link["rel"]
                         if name == attr:
-                            obj = WLSObject(name, link['href'], self._wls)
+                            obj = WLSObject(name, link["href"], self._wls)
                             setattr(self, name, obj)
                             return obj
 
-            elif key == 'items':
+            elif key == "items":
                 for itm in item:
-                    if itm['name'] == attr:
-                        self_link = next((x['href'] for x in itm['links'] if x['rel'] == 'self'))
-                        return WLSObject(itm['name'], self_link, self._wls)
+                    if itm["name"] == attr:
+                        self_link = next(
+                            (x["href"] for x in itm["links"] if x["rel"] == "self")
+                        )
+                        return WLSObject(itm["name"], self_link, self._wls)
 
             else:
                 if key == attr:
                     return item
 
-        raise AttributeError('\'{}\' object has no attribute \'{}\''.format(self._name, attr))
+        raise AttributeError(
+            "'{}' object has no attribute '{}'".format(self._name, attr)
+        )
 
     def __getitem__(self, key):
         # this is here for items with weird names
@@ -318,15 +355,17 @@ class WLSObject(object):
         iter_items = []
         for key in collection:
             item = collection[key]
-            if key == 'items':
+            if key == "items":
                 is_iterable = True
                 for itm in item:
-                    self_link = next((x['href'] for x in itm['links'] if x['rel'] == 'self'))
-                    iter_items.append(WLSObject(itm['name'], self_link, self._wls))
+                    self_link = next(
+                        (x["href"] for x in itm["links"] if x["rel"] == "self")
+                    )
+                    iter_items.append(WLSObject(itm["name"], self_link, self._wls))
         if is_iterable:
             return WLSItems(iter_items)
 
-        raise TypeError('\'{}\' object is not iterable'.format(self._name))
+        raise TypeError("'{}' object is not iterable".format(self._name))
 
     def __len__(self):
         try:
@@ -334,7 +373,7 @@ class WLSObject(object):
         except TypeError:
             pass
 
-        raise TypeError('object of type \'{}\' has no len()'.format(self._name))
+        raise TypeError("object of type '{}' has no len()".format(self._name))
 
     def delete(self, prefer_async=False, **kwargs):
         """
@@ -399,5 +438,4 @@ class WLSAction(object):
         self._wls = wls
 
     def __call__(self, prefer_async=False, **kwargs):
-        return self._wls.post(self._url, prefer_async,
-                              json=kwargs if kwargs else {})
+        return self._wls.post(self._url, prefer_async, json=kwargs if kwargs else {})
