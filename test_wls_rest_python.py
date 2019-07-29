@@ -105,6 +105,29 @@ def test_wls_init_nondefault_timeout():
     assert wls.timeout == 832
 
 
+def test_wls_repr():
+    collection = {
+        "version": "12.2.1.3",
+        "isLatest": True,
+        "lifecycle": "active",
+        "links": [
+            {"rel": "edit", "href": "https://edit-link"},
+            {"rel": "domainRuntime", "href": "https://domainruntime-link"},
+        ],
+    }
+    with requests_mock.mock() as r:
+        r.get(
+            "https://wls.example.com:7001/management/weblogic/latest", json=collection
+        )
+        wls = wls_rest_python.WLS(
+            "https://wls.example.com:7001", "weblogic", "Welcome1"
+        )
+    assert (
+        repr(wls)
+        == "<WLS url='https://wls.example.com:7001/management/weblogic/latest' username='weblogic' version='12.2.1.3'>"
+    )
+
+
 def test_wls_get():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.timeout = 372
@@ -567,6 +590,20 @@ def test_wls_object_without_len():
         len(wls_obj)
 
 
+def test_wls_object_repr():
+    collection = {
+        "links": [{"rel": "self", "href": "https://self-link"}],
+        "attr1": False,
+        "attr2": 9,
+        "attr3": -7,
+        "name": "what",
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
+    assert repr(wls_obj) == "<WLSObject name='name' url='https://url'>"
+
+
 def test_wls_object_empty_items():
     # If there is an empty item array in the response,
     # it means it is iterable, only withouth objects
@@ -651,3 +688,9 @@ def test_wls_action_async():
     action_answer = wls_action(prefer_async=True)
     fake_wls.post.assert_called_once_with("https://url", True, json={})
     assert isinstance(action_answer, MagicMock)
+
+
+def test_wls_action_repr():
+    fake_wls = MagicMock()
+    wls_action = wls_rest_python.WLSAction("name", "https://url", fake_wls)
+    assert repr(wls_action) == "<WLSAction name='name' url='https://url'>"

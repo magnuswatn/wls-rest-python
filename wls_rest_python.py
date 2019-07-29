@@ -128,6 +128,11 @@ class WLS(object):
             link_obj = WLSObject(link["rel"], link["href"], self)
             setattr(self, link["rel"], link_obj)
 
+    def __repr__(self):
+        return "<WLS url='{}' username='{}' version='{}'>".format(
+            self.base_url, self.session.auth[0], self.version
+        )
+
     def get(self, url, **kwargs):
         """
         Does a GET request to the specified URL.
@@ -357,6 +362,9 @@ class WLSObject(object):
 
         raise TypeError("object of type '{}' has no len()".format(self._name))
 
+    def __repr__(self):
+        return "<WLSObject name='{}' url='{}'>".format(self._name, self._url)
+
     def delete(self, prefer_async=False, **kwargs):
         """
         Deletes the resource. Will result in an DELETE request to the self url
@@ -418,6 +426,9 @@ class WLSAction(object):
         self._url = url
         self._name = name
         self._wls = wls
+
+    def __repr__(self):
+        return "<WLSAction name='{}' url='{}'>".format(self._name, self._url)
 
     def __call__(self, prefer_async=False, **kwargs):
         return self._wls.post(self._url, prefer_async, json=kwargs if kwargs else {})
