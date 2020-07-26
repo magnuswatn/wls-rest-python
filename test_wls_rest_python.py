@@ -128,6 +128,86 @@ def test_wls_repr():
     )
 
 
+# def test_wls_with_edit_session():
+#    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+#    fake_wls.edit = MagicMock()
+#    with wls_rest_python.WLS.edit_session(fake_wls):
+#        fake_wls.edit.tjohei()
+#
+#    fake_wls.edit.changeManager.startEdit.assert_called_once()
+#    fake_wls.edit.changeManager.activate.assert_called_once()
+#    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+#
+# def test_wls_with_edit_session_no_activate():
+#    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+#    fake_wls.edit = MagicMock()
+#    with wls_rest_python.WLS.edit_session(fake_wls, activate=False):
+#        fake_wls.edit.tjohei()
+#
+#    fake_wls.edit.changeManager.startEdit.assert_called_once()
+#    fake_wls.edit.changeManager.activate.assert_not_called()
+#    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+#
+#
+# def test_wls_with_edit_session_exception():
+#    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+#    fake_wls.edit = MagicMock()
+#    with pytest.raises(Exception):
+#        with wls_rest_python.WLS.edit_session(fake_wls):
+#            raise Exception()
+#
+#    fake_wls.edit.changeManager.startEdit.assert_called_once()
+#    fake_wls.edit.changeManager.cancelEdit.assert_called_once()
+#    fake_wls.edit.changeManager.activate.assert_not_called()
+#
+
+
+def test_wls_with_edit_session():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+    fake_wls.session = MagicMock()
+    fake_wls.session.headers = {}
+    with wls_rest_python.WLS.edit_session(fake_wls) as wls_edit:
+        wls_edit.edit.tjohei()
+
+    assert "weblogic.edit.session" not in fake_wls.session.headers
+    assert "weblogic.edit.session" in wls_edit.session.headers
+    wls_edit.edit.changeManager.startEdit.assert_called_once()
+    wls_edit.edit.changeManager.activate.assert_called_once()
+    wls_edit.edit.changeManager.cancelEdit.assert_not_called()
+
+
+def test_wls_with_edit_session_no_activate():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+    fake_wls.session = MagicMock()
+    fake_wls.session.headers = {}
+    with wls_rest_python.WLS.edit_session(fake_wls, activate=False) as wls_edit:
+        wls_edit.edit.tjohei()
+
+    assert "weblogic.edit.session" not in fake_wls.session.headers
+    assert "weblogic.edit.session" in wls_edit.session.headers
+    wls_edit.edit.changeManager.startEdit.assert_called_once()
+    wls_edit.edit.changeManager.activate.assert_not_called()
+    wls_edit.edit.changeManager.cancelEdit.assert_not_called()
+
+
+def test_wls_with_edit_session_exception():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+    fake_wls.session = MagicMock()
+    fake_wls.session.headers = {}
+    with pytest.raises(Exception):
+        with wls_rest_python.WLS.edit_session(fake_wls) as wls_edit:
+            raise Exception()
+
+    assert "weblogic.edit.session" not in fake_wls.session.headers
+    assert "weblogic.edit.session" in wls_edit.session.headers
+    wls_edit.edit.changeManager.startEdit.assert_called_once()
+    wls_edit.edit.changeManager.cancelEdit.assert_called_once()
+    wls_edit.edit.changeManager.activate.assert_not_called()
+
+
 def test_wls_get():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.timeout = 372

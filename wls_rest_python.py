@@ -4,6 +4,9 @@ A Python client for the Weblogic Server REST API.
 https://github.com/magnuswatn/wls-rest-python
 """
 import logging
+import uuid
+from contextlib import contextmanager
+from copy import deepcopy
 
 import requests
 
@@ -128,6 +131,29 @@ class WLS(object):
         for link in collection["links"]:
             link_obj = WLSObject(link["rel"], link["href"], self)
             setattr(self, link["rel"], link_obj)
+
+    @contextmanager
+    def edit_session(self, activate=True):
+        """
+        Context manager. Starts a new named edit session on the Weblogic server,
+        and either commits or rollbacks afterwards.
+
+        with wls.edit_session() as edit_wls:
+            edit_wls.edit....
+        """
+        edit_session_id = str(uuid.uuid4())
+        logger.debug("Starting edit session with ID '%s'", edit_session_id)
+        new_self = deepcopy(self)
+        new_self.session.headers.update({"weblogic.edit.session": edit_session_id})
+        change_manager = new_self.edit.changeManager
+        change_manager.startEdit()
+        try:
+            yield new_self
+        except:
+            change_manager.cancelEdit()
+            raise
+        if activate:
+            change_manager.activate()
 
     def __repr__(self):
         return "<WLS url='{}' username='{}' version='{}'>".format(
