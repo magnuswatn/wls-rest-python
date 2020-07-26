@@ -1,10 +1,10 @@
 wls-rest-python
 ===============
 
-.. image:: https://travis-ci.org/magnuswatn/wls-rest-python.svg?branch=master
+.. image:: https://travis-ci.org/magnuswatn/wls-rest-python.svg?branch=main
     :target: https://travis-ci.org/magnuswatn/wls-rest-python
 
-.. image:: https://codecov.io/gh/magnuswatn/wls-rest-python/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/magnuswatn/wls-rest-python/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/magnuswatn/wls-rest-python
 
 .. image:: https://badge.fury.io/py/wls-rest-python.svg
