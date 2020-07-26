@@ -4,9 +4,10 @@ A Python client for the Weblogic Server REST API.
 https://github.com/magnuswatn/wls-rest-python
 """
 import logging
+
 import requests
 
-__version__ = "0.1.5"
+__version__ = "0.1.6dev"
 
 logger = logging.getLogger(__name__)
 
@@ -86,12 +87,12 @@ class ServiceUnavailableException(WLSException):
 
 class WLS(object):
     """
-    Represents a WLS REST server
+    Represents a WLS REST server.
 
     :param string host: protocol://hostname:port of the server.
-    :param string username: Username used to authenticate against the server
-    :param string password: Password used to authenticate against the server
-    :param string version: Version of the rest interface to use. Defaults to "latest"
+    :param string username: Username used to authenticate against the server.
+    :param string password: Password used to authenticate against the server.
+    :param string version: Version of the rest interface to use. Defaults to "latest".
     :param bool verify: Whether to verify certificates on SSL connections.
     :param float timeout: The timeout value to use, in seconds. Default is 305.
     """
@@ -146,8 +147,8 @@ class WLS(object):
         """
         Does a POST request to the specified URL.
 
-        If the response is a job or an collection, it will return an
-        WLSObject. Otherwise it will return the decoded JSON
+        If the response is a job or a collection, it will return a
+        WLSObject. Otherwise it will return the decoded JSON.
         """
         headers = {"Prefer": "respond-async"} if prefer_async else None
         response = self.session.post(
@@ -159,8 +160,8 @@ class WLS(object):
         """
         Does a DELETE request to the specified URL.
 
-        If the response is a job or an collection, it will return an
-        WLSObject. Otherwise it will return the decoded JSON
+        If the response is a job or a collection, it will return a
+        WLSObject. Otherwise it will return the decoded JSON.
         """
         headers = {"Prefer": "respond-async"} if prefer_async else None
         response = self.session.delete(
@@ -189,7 +190,7 @@ class WLS(object):
             self._handle_error(response)
 
         # GET is used by the WLSObject to retrieve the collection
-        # so it must return only the decoded JSON, not an WLSobject
+        # so it must return only the decoded JSON, not a WLSobject.
         if response.request.method == "GET":
             return response.json()
 
@@ -208,7 +209,7 @@ class WLS(object):
             name = response_json["name"]
         except (KeyError, StopIteration):
             # Not a job, and not a collection.
-            # Don't know what it is, so just return the decoded json
+            # Don't know what it is, so just return the decoded json.
             return response_json
 
         return WLSObject(name, link, self)
@@ -259,7 +260,7 @@ class WLSObject(object):
     Represents all the different WLS objects.
 
     The attributes will differ based on the
-    collection used to instantiate it
+    collection used to instantiate it.
     """
 
     def __init__(self, name, url, wls):
@@ -288,9 +289,9 @@ class WLSObject(object):
 
     def __getattr__(self, attr):
         """
-        Retrieves the properties dynamically from the collection
+        Retrieves the properties dynamically from the collection.
 
-        We store actions and links for re-use, since they are expected not to change
+        We store actions and links for re-use, since they are expected not to change.
         """
         collection = self._wls.get(self._url)
         for key in collection:
@@ -367,25 +368,25 @@ class WLSObject(object):
 
     def delete(self, prefer_async=False, **kwargs):
         """
-        Deletes the resource. Will result in an DELETE request to the self url
+        Deletes the resource. Will result in a DELETE request to the self url.
 
-        The kwargs are sendt through to requests
+        The kwargs are sendt through to requests.
         """
         return self._wls.delete(self._url, prefer_async, **kwargs)
 
     def create(self, prefer_async=False, **kwargs):
         """
-        Creates a resource. Will result in an POST request to the self url
+        Creates a resource. Will result in a POST request to the self url.
 
-        The kwargs are sendt through to requests
+        The kwargs are sendt through to requests.
         """
         return self._wls.post(self._url, prefer_async, **kwargs)
 
     def update(self, prefer_async=False, **kwargs):
         """
-        Updates an property of the resource.
+        Updates a property of the resource.
 
-        The kwargs will be sent as json
+        The kwargs will be sent as json.
         """
         return self._wls.post(self._url, prefer_async, json=kwargs)
 
@@ -394,7 +395,7 @@ class WLSItems(object):
     """
     Items from an object.
 
-    Used as an iterator
+    Used as an iterator.
     """
 
     def __init__(self, items):
