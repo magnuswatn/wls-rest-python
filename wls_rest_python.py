@@ -133,27 +133,26 @@ class WLS(object):
             setattr(self, link["rel"], link_obj)
 
     @contextmanager
-    def edit_session(self, activate=True):
+    def edit_session(self, force=False, finish=True):
         """
-        Context manager. Starts a new named edit session on the Weblogic server,
-        and either commits or rollbacks afterwards.
+        Context manager for easier use of edit sessions.
 
-        with wls.edit_session() as edit_wls:
-            edit_wls.edit....
+        :param bool force: Whether to cancel any active edit sessions.
+            Default is False.
+        :param bool finish: Whether to actually active/cancel the edit session.
+            Useful for testing. Default is True.
         """
-        edit_session_id = str(uuid.uuid4())
-        logger.debug("Starting edit session with ID '%s'", edit_session_id)
-        new_self = deepcopy(self)
-        new_self.session.headers.update({"weblogic.edit.session": edit_session_id})
-        change_manager = new_self.edit.changeManager
+        change_manager = self.edit.changeManager
+        if force and change_manager.changeSession: # TODO
+            change_manager.cancelEdit()
+
         change_manager.startEdit()
         try:
-            yield new_self
+            yield
         except:
-            change_manager.cancelEdit()
+            change_manager.cancelEdit() if finish else None
             raise
-        if activate:
-            change_manager.activate()
+        change_manager.activate() if finish else None
 
     def __repr__(self):
         return "<WLS url='{}' username='{}' version='{}'>".format(
