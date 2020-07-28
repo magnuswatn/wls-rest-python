@@ -268,6 +268,12 @@ class WLSObject(object):
         self._url = url
         self._wls = wls
 
+    def __nonzero__(self):
+        return True
+
+    def __bool__(self):
+        return True
+
     def __dir__(self):
         attrs = []
         collection = self._wls.get(self._url)
