@@ -290,6 +290,7 @@ class WLSObject(object):
         self._name = name
         self._url = url
         self._wls = wls
+        self._populated = False
 
     def __nonzero__(self):
         return True
@@ -297,11 +298,37 @@ class WLSObject(object):
     def __bool__(self):
         return True
 
+    def _populate(self, links):
+
+        if self._populated:
+            return {}
+
+        added_attrs = {}
+
+        if links is not None:
+            for link in links:
+                if link["rel"] == "action":
+                    name = link["title"]
+                    obj = WLSAction(name, link["href"], self._wls)
+                else:
+                    name = link["rel"]
+                    obj = WLSObject(name, link["href"], self._wls)
+                setattr(self, name, obj)
+                added_attrs[name] = obj
+        self._populated = True
+
+        return added_attrs
+
     def __dir__(self):
         attrs = []
         collection = self._wls.get(self._url)
-        for key in collection:
-            item = collection[key]
+
+        # Let's populate since we have
+        # retrieved the collection anyway.
+        self._populate(collection.get("links"))
+
+        for key, item in collection.items():
+
             if key == "links":
                 for link in item:
                     if link["rel"] == "action":
@@ -320,38 +347,31 @@ class WLSObject(object):
         """
         Retrieves the properties dynamically from the collection.
 
-        We store actions and links for re-use, since they are expected not to change.
+        Actions and links are stored on the object after first server
+        contact, since they are expected not to change. Others attributes
+        are always retrieved from the server.
         """
         collection = self._wls.get(self._url)
-        for key in collection:
-            item = collection[key]
-            if key == "links":
-                for link in item:
-                    if link["rel"] == "action":
-                        name = link["title"]
-                        if name == attr:
-                            obj = WLSAction(name, link["href"], self._wls)
-                            setattr(self, name, obj)
-                            return obj
 
-                    else:
-                        name = link["rel"]
-                        if name == attr:
-                            obj = WLSObject(name, link["href"], self._wls)
-                            setattr(self, name, obj)
-                            return obj
+        links = collection.pop("links", None)
+        static_attrs = self._populate(links)
+        if attr in static_attrs:
+            return static_attrs.get(attr)
 
-            elif key == "items":
+        if attr in collection:
+            return collection.get(attr)
+
+        for key, item in collection.items():
+            if key == "items":
                 for itm in item:
                     if itm["name"] == attr:
-                        self_link = next(
-                            (x["href"] for x in itm["links"] if x["rel"] == "self")
+                        return WLSObject(
+                            itm["name"],
+                            next(
+                                (x["href"] for x in itm["links"] if x["rel"] == "self")
+                            ),
+                            self._wls,
                         )
-                        return WLSObject(itm["name"], self_link, self._wls)
-
-            else:
-                if key == attr:
-                    return item
 
         raise AttributeError(
             "'{}' object has no attribute '{}'".format(self._name, attr)
@@ -361,26 +381,30 @@ class WLSObject(object):
         # this is here for items with weird names
         # e.g. webapps with version number (myWebapp#1.2.3)
         try:
-            return self.__getattr__(key)
+            return getattr(self, key)
         except AttributeError:
             pass
         raise KeyError(key)
 
     def __iter__(self):
         collection = self._wls.get(self._url)
-        is_iterable = False
-        iter_items = []
-        for key in collection:
-            item = collection[key]
-            if key == "items":
-                is_iterable = True
-                for itm in item:
-                    self_link = next(
-                        (x["href"] for x in itm["links"] if x["rel"] == "self")
+
+        # Let's populate since we have
+        # retrieved the collection anyway.
+        self._populate(collection.get("links"))
+
+        items = collection.get("items")
+        if items is not None:
+            return WLSItems(
+                [
+                    WLSObject(
+                        item["name"],
+                        next((x["href"] for x in item["links"] if x["rel"] == "self")),
+                        self._wls,
                     )
-                    iter_items.append(WLSObject(itm["name"], self_link, self._wls))
-        if is_iterable:
-            return WLSItems(iter_items)
+                    for item in items
+                ]
+            )
 
         raise TypeError("'{}' object is not iterable".format(self._name))
 
@@ -435,7 +459,7 @@ class WLSItems(object):
         try:
             item = self.items[self.counter]
         except IndexError:
-            raise StopIteration
+            raise StopIteration()
 
         self.counter += 1
         return item

@@ -520,6 +520,119 @@ def test_wls_object_getattr():
     assert isinstance(wls_obj.item_1, wls_rest_python.WLSObject)
     with pytest.raises(AttributeError):
         wls_obj.what
+    # the actions and object should be stored from the first getattr,
+    # so we should only have contacted the server three times:
+    # 1 = .property (first getattr), 2 = item_1 (dynamic obj)
+    # and then .what
+    assert fake_wls.get.call_count == 3
+
+
+def test_wls_object_getattr_serveral_properties():
+    """
+    Actions and item should be stored from the first getattr.
+    """
+    collection = {
+        "items": [
+            {
+                "links": [{"rel": "self", "href": "https://self-link"}],
+                "attr1": True,
+                "attr2": 2,
+                "attr3": 3,
+                "name": "item_1",
+            }
+        ],
+        "name": "navn",
+        "property": "yesyes",
+        "property2": "nonono",
+        "links": [
+            {"rel": "action", "title": "superAction", "href": "https://action-link"},
+            {"rel": "action", "title": "superAction2", "href": "https://action-link"},
+            {"rel": "underCollection", "href": "https://undercollection-link"},
+        ],
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
+    assert wls_obj.superAction._url == "https://action-link"
+    assert wls_obj.underCollection._url == "https://undercollection-link"
+    assert wls_obj.property == collection["property"]
+    assert wls_obj.property2 == collection["property2"]
+    assert isinstance(wls_obj.item_1, wls_rest_python.WLSObject)
+    with pytest.raises(AttributeError):
+        wls_obj.what
+    # the actions and object should be stored from the first getattr,
+    # so we should only have contacted the server five times:
+    # 1 = .superAction (first getattr), 2 = property  3 = property2,
+    # 4 = item_1 (dynamic obj), 5 = .what
+    assert fake_wls.get.call_count == 5
+
+
+def test_wls_object_getattr_after_dir():
+    """
+    Actions and item should be stored from dir().
+    """
+    collection = {
+        "items": [
+            {
+                "links": [{"rel": "self", "href": "https://self-link"}],
+                "attr1": True,
+                "attr2": 2,
+                "attr3": 3,
+                "name": "item_1",
+            }
+        ],
+        "name": "navn",
+        "property": "yesyes",
+        "property2": "nonono",
+        "links": [
+            {"rel": "action", "title": "superAction", "href": "https://action-link"},
+            {"rel": "action", "title": "superAction2", "href": "https://action-link"},
+            {"rel": "underCollection", "href": "https://undercollection-link"},
+        ],
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
+    dir(wls_obj)
+    assert wls_obj.superAction._url == "https://action-link"
+    assert wls_obj.underCollection._url == "https://undercollection-link"
+    # the actions and object should be stored from the dir(),
+    # so we should only have contacted the server that one time.
+    assert fake_wls.get.call_count == 1
+
+
+def test_wls_object_getattr_after_iter():
+    """
+    Actions and item should be stored from the first iter().
+    """
+    collection = {
+        "items": [
+            {
+                "links": [{"rel": "self", "href": "https://self-link"}],
+                "attr1": True,
+                "attr2": 2,
+                "attr3": 3,
+                "name": "item_1",
+            }
+        ],
+        "name": "navn",
+        "property": "yesyes",
+        "property2": "nonono",
+        "links": [
+            {"rel": "action", "title": "superAction", "href": "https://action-link"},
+            {"rel": "action", "title": "superAction2", "href": "https://action-link"},
+            {"rel": "underCollection", "href": "https://undercollection-link"},
+        ],
+    }
+    fake_wls = MagicMock()
+    fake_wls.get = MagicMock(return_value=collection)
+    wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
+    [x for x in wls_obj]
+    assert wls_obj.superAction._url == "https://action-link"
+    assert wls_obj.underCollection._url == "https://undercollection-link"
+    # the actions and object should be stored from the iter(),
+    # so we should only have contacted the server that one time.
+    assert fake_wls.get.call_count == 1
 
 
 def test_wls_object_getitem():
@@ -543,6 +656,7 @@ def test_wls_object_getitem():
     fake_wls = MagicMock()
     fake_wls.get = MagicMock(return_value=collection)
     wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
+    assert wls_obj["superAction"]._url == "https://action-link"
     assert wls_obj["property"] == collection["property"]
     assert wls_obj["superAction"]._url == "https://action-link"
     assert wls_obj["underCollection"]._url == "https://undercollection-link"
