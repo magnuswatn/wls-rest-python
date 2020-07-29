@@ -110,3 +110,16 @@ Undeploy all applications and deploy a new one:
         'planPath': open('/u01/wars/myWebAppPlan.xml', 'rb')
     }
     wls.edit.appDeployments.create(files=deployment_info)
+
+
+Do some changes with an edit session:
+
+.. code-block:: python
+
+    from wls_rest_python import WLS
+
+    wls = WLS('https://wls.example.com:7001', 'weblogic', 'welcome1')
+
+    with wls.edit_session():
+        for jdbc_system_resource in wls.edit.JDBCSystemResources:
+            jdbc_system_resource.update(password="myPassword")

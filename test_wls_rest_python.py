@@ -128,6 +128,84 @@ def test_wls_repr():
     )
 
 
+def test_wls_with_edit_session():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    with wls_rest_python.WLS.edit_session(fake_wls):
+        fake_wls.edit.tjohei()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.activate.assert_called_once_with()
+    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+
+
+def test_wls_with_edit_session_not_finish():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    with wls_rest_python.WLS.edit_session(fake_wls, finish=False):
+        fake_wls.edit.tjohei()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.activate.assert_not_called()
+    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+
+
+def test_wls_with_edit_session_exception():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    with pytest.raises(Exception):
+        with wls_rest_python.WLS.edit_session(fake_wls):
+            raise Exception()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.cancelEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.activate.assert_not_called()
+
+
+def test_wls_with_edit_session_exception_not_finish():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    with pytest.raises(Exception):
+        with wls_rest_python.WLS.edit_session(fake_wls, finish=False):
+            raise Exception()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+    fake_wls.edit.changeManager.activate.assert_not_called()
+
+
+def test_wls_with_edit_session_force_no_session():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    fake_wls.edit.changeManager.locked = False
+
+    with wls_rest_python.WLS.edit_session(fake_wls, force=True):
+        fake_wls.edit.tjohei()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.activate.assert_called_once_with()
+    fake_wls.edit.changeManager.cancelEdit.assert_not_called()
+
+
+def test_wls_with_edit_session_force_existing_session():
+    fake_wls = MagicMock(spec=wls_rest_python.WLS)
+    fake_wls.edit = MagicMock()
+
+    fake_wls.edit.changeManager.locked = True
+
+    with wls_rest_python.WLS.edit_session(fake_wls, force=True):
+        fake_wls.edit.tjohei()
+
+    fake_wls.edit.changeManager.startEdit.assert_called_once_with()
+    fake_wls.edit.changeManager.activate.assert_called_once_with()
+    fake_wls.edit.changeManager.cancelEdit.assert_called_once_with()
+
+
 def test_wls_get():
     fake_wls = MagicMock(spec=wls_rest_python.WLS)
     fake_wls.timeout = 372
@@ -589,6 +667,7 @@ def test_wls_object_without_len():
     with pytest.raises(TypeError):
         len(wls_obj)
 
+
 def test_wls_object_without_len_truth_check():
     collection = {
         "links": [{"rel": "self", "href": "https://self-link"}],
@@ -601,6 +680,7 @@ def test_wls_object_without_len_truth_check():
     fake_wls.get = MagicMock(return_value=collection)
     wls_obj = wls_rest_python.WLSObject("name", "https://url", fake_wls)
     assert bool(wls_obj) is True
+
 
 def test_wls_object_repr():
     collection = {
